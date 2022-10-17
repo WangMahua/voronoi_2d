@@ -16,9 +16,7 @@ classdef agent
         fy = 565.6;
 
         % param of range 
-        cov_r_x = 0.1;
-        cov_r_y = 0.1;
-        cov_r_z = 0.1;
+        cov_r = [0.1 0.1 0.1];
 
         % param of bearing 
         cov_b_alpha = 0.1;
@@ -28,7 +26,11 @@ classdef agent
     
    methods (Static)
         % obseverability of 3 UAV, which are also dense function in voronoi
-        
+        function dis = dis_function()
+            dis = 0;
+        end
+
+
         % camera
         function dense = dense_function_1(q_pos,u_pos)
 
@@ -41,20 +43,22 @@ classdef agent
         end
 
         % bearing
-        function dense = dense_function_2()
-            dense = 1/cov_r_x^2 + 1/cov_r_y^2 + 1/cov_r_z^2;
+        function dense = dense_function_2(t_num)
+            for i = 1:t_num
+                dense = dense + 1/cov_r(i)^2;
+            end
         end
 
         % range sensor    
-        function dense = dense_function_3(q_p,p_p)
-            
-            % p -> uav pos ; q -> particle pos  
-            r = q_p - p_p;
-       
+        function dense = dense_function_3(q_p,t_p)
+            dense = 0;
+            % t -> n*3 target pos ; q -> particle pos 1*3
 
-            dense = 1/(cov_b_beta*(r(1)^2 + r(2)^2)) + 1/(cov_b_alpha*(r(1)^2 + r(2)^2 + r(3)^2)) + ...
-                 1/(cov_b_beta*(r(1)^2 + r(2)^2)) + 1/(cov_b_alpha*(r(1)^2 + r(2)^2 + r(3)^2)) +...
-                 1/(cov_b_beta*(r(1)^2 + r(2)^2)) + 1/(cov_b_alpha*(r(1)^2 + r(2)^2 + r(3)^2)) ;
+            for i = 1:length(t_p)
+               r = t_p(i) - q_p;
+               dense = dense + 1/(cov_b_beta*(r(i,1)^2 + r(i,1)^2)) + 1/(cov_b_alpha*(r(i,1)^2 + r(i,2)^2 + r(i,3)^2)) ;
+            end
+
         end
    end
 
